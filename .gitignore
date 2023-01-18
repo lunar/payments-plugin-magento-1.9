@@ -1,0 +1,11 @@
+.settings
+.git
+.idea
+*.iml
+.vscode
+.DS_Store
+reports/*
+vendor
+buildInfo.json
+/.shuttle/
+/.dockerignore

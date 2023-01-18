@@ -1,0 +1,6 @@
+plan: false
+
+vars:
+  service: payments-plugin-magento-1.9
+  squad: juno
+  domain: merchant-payments
