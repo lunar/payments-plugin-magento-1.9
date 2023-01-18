@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<layout version="1.0.0">
+    <lunar_common_section>
+        <reference name="head">
+            <block type="core/text" name="lunar">
+                <action method="setText" ifconfig="payment/lunar/status">
+                    <text>
+                        <![CDATA[<script type="text/javascript" src="//sdk.paylike.io/6.js"></script>]]>
+                    </text>
+                </action>
+            </block>
+        </reference>
+    </lunar_common_section>
+
+    <checkout_onepage_index>
+        <update handle="lunar_common_section"/>
+    </checkout_onepage_index>
+
+    <checkout_onepage_review>
+        <reference name="checkout.onepage.agreements">
+            <action method="setTemplate">
+                <template>lunar/form/checkout/agreements/onepage.phtml</template>
+            </action>
+        </reference>
+    </checkout_onepage_review>
+
+    <onestepcheckout_index_index>
+        <update handle="lunar_common_section"/>
+    </onestepcheckout_index_index>
+
+    <onestepcheckout_payment_review_material_20columns>
+        <reference name="review_info">
+            <block type="core/template" name="lunar.updated.total.block" template="lunar/ajaxupdate.phtml"  />
+        </reference>
+    </onestepcheckout_payment_review_material_20columns>
+
+    <checkout_onestep_index>
+        <update handle="lunar_common_section"/>
+    </checkout_onestep_index>
+
+	<checkout_onestep_index>
+        <reference name="checkout.onepage.agreements">
+            <action method="setTemplate">
+                <template>lunar/form/checkout/agreements/onepage.phtml</template>
+            </action>
+        </reference>
+    </checkout_onestep_index>
+</layout>

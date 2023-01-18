@@ -1,0 +1,380 @@
+<?php
+
+$quote          = Mage::getSingleton( 'checkout/cart' )->getQuote();
+$lunar_helper   = Mage::helper( 'lunar_payment' );
+$lunar          = Mage::getModel( 'lunar_payment/lunar' );
+$client         = $lunar->getClient(); // load vendor
+$currencies     = new Lunar_Data_Currencies();
+$grand_total    = $this->helper( 'checkout/cart' )->getQuote()->getGrandTotal();
+$currency_code  = Mage::app()->getStore()->getCurrentCurrencyCode();
+$email          = $quote->getBillingAddress()->getEmail();
+$name           = $quote->getBillingAddress()->getName();
+
+if ( ! $email ) { $email = $quote->getCustomerEmail(); }
+if ( ! $name ) { $name = $quote->getCustomerName(); }
+
+if ( Mage::getStoreConfig( 'payment/lunar/status' ) ) { ?>
+
+    <style type="text/css">
+        .lunar-logo {
+            width: 40px;
+            padding-right: 10px;
+        }
+
+        label[for="p_method_lunar"] span {
+            float: left;
+            margin-right: 10px;
+            margin-top: 6px;
+        }
+
+        label[for="p_method_lunar"] p {
+            clear: both;
+        }
+
+        label[for="p_method_lunar"] span ~ img {
+            margin-top: 5px;
+        }
+    </style>
+    <script type="text/javascript">
+      window.LunarLogger = {
+        setContext: function () {},
+        log: function() {},
+      };
+
+      <?php if ($lunar_helper->getLogsEnabled() == "1") { ?>
+
+        jQuery.ajax({
+          url: "/index.php/lunar/log/writtable",
+          success: function (data) {
+            const response = JSON.parse(data);
+            if (response.writable) {
+              window.LunarLogger = {
+                date: new Date().getTime(),
+                context: {},
+                setContext: function(context) {
+                  this.context = context;
+                },
+                log: function(message, data = {}) {
+                  const body = {
+                    message,
+                    data,
+                    date: this.date,
+                    context: this.context,
+                  }
+
+                  return new Promise(function (resolve) {
+                    new Ajax.Request("/index.php/lunar/log/log", {
+                      method:'post',
+                      parameters: {
+                        data: JSON.stringify(body),
+                      },
+                      onComplete: function () {
+                        resolve();
+                      },
+                    });
+                  });
+                }
+              }
+            }
+          },
+        });
+
+      <?php } ?>
+
+    </script>
+
+    <script type="text/javascript">
+	    if (typeof Paylike == 'undefined') {
+			  alert("The API object is not defined. Check admin configuration keys");
+      }
+
+        document.getElementById('p_method_lunar').checked = false;
+
+        var lunarVAR = {
+            tax: '<?php echo Mage::helper( 'checkout' )->getQuote()->getShippingAddress()->getData( 'tax_amount' ); ?>',
+            telephone: '<?php echo $lunar_helper->getTelephone(); ?>',
+            address: '<?php echo $lunar_helper->getAddress(); ?>',
+            email: '<?php echo $email; ?>',
+            name: '<?php echo $name; ?>',
+            amountlunar:<?php echo $currencies->ceil( $grand_total, $currency_code ) ?>
+        };
+
+        var lunar_method_desc = '<?php echo $lunar_helper->getPaymentMethodDescription(); ?>';
+        var lunar_method_credit_card_logos = '<?php echo $lunar_helper->getCreditCardLogos( true ); ?>';
+        var lunar_method_title = jQuery('#p_method_lunar').parents('dt').find('label[for="p_method_lunar"]').text().replace(/^\s+|\s+$/g, '');
+        var lunarSelectedShipmentMethod = '<?php echo Mage::helper( 'checkout' )->getQuote()->getShippingAddress()->getShippingMethod(); ?>';
+        var lunarHtml = '<img src="<?php echo Mage::getBaseUrl( Mage_Core_Model_Store::URL_TYPE_SKIN ); ?>frontend/lunar/logo.png" alt="Lunar" title="Lunar" class="v-middle lunar-logo" />';
+        lunarHtml += '<span>' + lunar_method_title + '</span>';
+
+        lunar_method_credit_card_logos = jQuery.parseJSON(lunar_method_credit_card_logos);
+
+        jQuery.each(lunar_method_credit_card_logos, function (index, item) {
+            lunarHtml += '<img src="<?php echo Mage::getBaseUrl( Mage_Core_Model_Store::URL_TYPE_SKIN ); ?>frontend/lunar/logos/' + item + '" alt="' + item + '" title="' + item + '" class="v-middle lunar-logo" style="height:26px;" />';
+        });
+        lunarHtml += '<p>' + lunar_method_desc + '</p>';
+        var lunarRadioButton = jQuery('#p_method_lunar').parents('dt').find('label[for="p_method_lunar"]');
+        var lunarRadioButtonText = lunarRadioButton.html().replace(/Lunar/g, '');
+
+        lunarRadioButtonText = lunarRadioButtonText.replace(new RegExp(lunar_method_title, "g"), '');
+        lunarRadioButton.html(lunarRadioButtonText + lunarHtml);
+
+        jQuery("input:radio").change(function () {
+            if (!jQuery("#p_method_lunar").is(":checked")) {
+                clearError();
+            }
+        });
+
+        function clearError() {
+            if (jQuery('#errorMessage-lunar').length > 0) {
+                jQuery('#errorMessage-lunar').remove();
+            }
+        }
+
+        function showError(message) {
+            clearError();
+            if (message != '') {
+                var html = '<div id="errorMessage-lunar" style="color: #ff0000; font-size: 13px; font-weight: normal;">' + message + '</div>';
+                jQuery('#p_method_lunar').parents('dt').append(html);
+            }
+        }
+
+        let lunarCONFIG = {
+          payment_mode: '<?php echo $lunar_helper->getPaymentMode(); ?>',
+          locale: '<?php echo Mage::app()->getLocale()->getLocaleCode(); ?>',
+          popupTitle: '<?php echo $lunar_helper->getPopupTitle(); ?>',
+          currency: '<?php echo $currency_code; ?>',
+          publicKey: '<?php echo $lunar_helper->getPublicKey(); ?>',
+          notReadyMessage: '<?php echo Mage::helper( 'lunar_payment' )->getAlertOnNotReady(); ?>',
+          amount: '<?php echo $grand_total; ?>',
+          quoteId: '<?php echo $this->helper( 'checkout/cart' )->getQuote()->getId(); ?>',
+          products: '<?php echo $lunar_helper->getProducts( true ); ?>',
+          customerIp: '<?php echo Mage::helper( 'core/http' )->getRemoteAddr(); ?>',
+          platform_version: '<?php echo Mage::getVersion(); ?>',
+          plugin_version: '<?php echo Mage::getConfig()->getNode( 'modules/Lunar_Payment/version' ); ?>',
+          oscVersion: '<?php echo Mage::getConfig()->getNode( 'modules/Magestore_Onestepcheckout/version' ); ?>'
+        }
+
+        // automated testing purposes
+        window.lunarminoramount = lunarVAR.amountlunar;
+        window.lunarSelectedMethodOfShipping = lunarSelectedShipmentMethod;
+        //document.querySelector('#p_method_lunar').addEventListener('click', pay);
+        document.querySelector('#p_method_lunar').addEventListener('click', lunarPaymentSelectHandler);
+
+
+        function lunarPaymentSelectHandler() {
+            //document.getElementById("lunar-transaction-id").value = "5910238566b6776329301fb9";
+            document.getElementById("lunar-transaction-id").removeAttribute("disabled");
+            document.getElementById("lunar-transaction-id").value = String(Math.floor((Math.random() * 1000000000000) + 1));
+        }
+
+        var $method_lunar = jQuery('#dt_method_lunar').find('span.no-display');
+
+        if($method_lunar.length>0){
+            document.getElementById('p_method_lunar').checked = true;
+            setTimeout(function() {
+                lunarPaymentSelectHandler()
+            },100);
+        }
+
+        function getFormElementId() {
+          if (document.getElementById("one-step-checkout-form")) {
+            return "one-step-checkout-form";
+          }
+
+          if (document.getElementById("amscheckout-onepage")) {
+            return "amscheckout-onepage";
+          }
+        }
+
+        let oldPlaceOrder = undefined;
+        const lunarPlaceOrder = function (element) {
+            var validator = new Validation(getFormElementId);
+            if (validator.validate()) {
+                if (
+                    jQuery('.ajax-loader1:visible').length > 0
+                    || jQuery('.ajax-loader2:visible').length > 0
+                    || jQuery('.ajax-loader3:visible').length > 0
+                ) {
+                    alert(lunarCONFIG.notReadyMessage);
+                } else {
+                    var currentShipmentCode = jQuery('input[name="shipping_method"]:checked').val();
+                    if (currentShipmentCode != window.lunarSelectedMethodOfShipping) {
+                        alert(lunarCONFIG.notReadyMessage);
+                    } else {
+                        validateLunar(2, element);
+                    }
+                }
+            } else {
+                alert(lunarCONFIG.notReadyMessage);
+            }
+        };
+
+        jQuery(document).ready(function ($) {
+            if (typeof window.oscPlaceOrder === 'function') {
+                oldPlaceOrder = window.oscPlaceOrder;
+                window.oscPlaceOrder = lunarPlaceOrder
+            }
+
+            if (typeof window.completeCheckout === 'function') {
+                oldPlaceOrder = window.completeCheckout;
+                window.completeCheckout = newPlaceOrder;
+            }
+        });
+
+        // fix bug in one page checkout and one step checkout
+        if (typeof review == 'undefined' || typeof review.oldSave == 'undefined') {
+            Review.prototype.oldSave = Review.prototype.save;
+        }
+
+        Review.prototype.save = function() {
+          	if( typeof review == 'undefined' || typeof review.form == 'undefined') {
+                validateLunar();
+          	} else {
+                if (new Validation(review.form).validate()) {
+                    validateLunar();
+                }
+          	}
+        }
+
+        var validateLunar = function (element) {
+            if (jQuery("#p_method_lunar").is(":checked")) {
+                var checkoutAgreementsForm = new VarienForm('checkout-agreements');
+
+                if (checkoutAgreementsForm.form && !checkoutAgreementsForm.validator.validate()) {
+                    return;
+                }
+
+                if (lunarCONFIG.publicKey) {
+                    /**
+                     * SDK client initialize
+                     */
+                    var sdkClient = Paylike(lunarCONFIG.publicKey);
+
+                    document.getElementById("lunar-transaction-id").removeAttribute("disabled");
+
+                    if (!lunarVAR.name || !lunarVAR.name.trim()) {
+                       var fname = document.querySelector("input[name=\"billing[firstname]\"]").value;
+
+                      var mname = null;
+                      var mnameInput = document.querySelector("input[name=\"billing[middlename]\"]");
+                      if (mnameInput) {
+                        mname = mnameInput.value;
+                      }
+
+                      var lname = document.querySelector("input[name=\"billing[lastname]\"]").value;
+                      lunarVAR.name = [fname, mname, lname].filter(function(n) {
+                        return !!n;
+                      }).join(" ");
+                    }
+
+                    if (!lunarVAR.email || !lunarVAR.email.trim()) {
+                      if (document.getElementById("amasty-scheckout-login-email")) {
+                        lunarVAR.email = document.querySelector("#amasty-scheckout-login-email").value;
+                      } else {
+                        lunarVAR.email = document.querySelector("input[name=\"billing[email]\"]").value;
+                      }
+                    }
+
+                    if (!lunarVAR.telephone || !lunarVAR.telephone.trim()) {
+                        lunarVAR.telephone = document.querySelector("input[name=\"billing[telephone]\"]").value;
+                    }
+
+                    var lunarArgs = {
+                        title: lunarCONFIG.popupTitle,
+                        currency: lunarCONFIG.currency,
+                        amount: lunarVAR.amountlunar,
+                        locale: lunarCONFIG.locale,
+                        custom: {
+                            quoteId: lunarCONFIG.quoteId,
+                            products: jQuery.parseJSON(lunarCONFIG.products),
+                            customer: {
+                                name: lunarVAR.name,
+                                email: lunarVAR.email,
+                                phoneNo: lunarVAR.telephone,
+                                address: lunarVAR.address,
+                                IP: lunarCONFIG.customerIp
+                            },
+                            platform: {
+                                name: 'Magento',
+                                version: lunarCONFIG.platform_version,
+                            },
+                            lunarPluginVersion: lunarCONFIG.plugin_version
+                        }
+                    };
+
+                    if (lunarCONFIG.payment_mode == 'test') {
+                      lunarArgs.test = {};
+                      // lunarArgs.test = {tds: {challenge: false}};
+                    }
+
+                    if (typeof window.oscPlaceOrder === 'function') {
+                      lunarArgs.custom.ecommerce = {
+                            name: 'OneStepCheckout',
+                            version: lunarCONFIG.oscVersion
+                        };
+                    }
+
+                    LunarLogger.setContext(lunarArgs);
+                    LunarLogger.log("Opening lunar popup");
+
+                    /**
+                     * SDK payment
+                     */
+                    sdkClient.popup(lunarArgs, function (err, res) {
+                        if (err) {
+                            if (err == 'closed') {
+                              LunarLogger.log("Lunar popup closed by user");
+                                //document.getElementById('p_method_lunar').checked = false;
+                            }
+                            return console.log(err);
+                        }
+
+                        LunarLogger.log("Lunar payment successfull. Transaction ID: " + res.transaction.id);
+                        document.getElementById("lunar-transaction-id").value = res.transaction.id.toString();
+
+                        LunarLogger.log("Saving order in magento system");
+                        const oldOnSave = review.onSave;
+                        const oldOnFail = checkout.ajaxFailure;
+
+                        review.onSave = function(transport) {
+                          const response = transport.responseJSON || transport.responseText.evalJSON(true) || {};
+                          let message = "";
+                          if (response.success || response.redirect) {
+                            message = "Order successfully saved";
+                          } else {
+                            message = "Failed to save order - " + response.error;
+                          }
+
+                          LunarLogger.log(message).then(() => {
+                            oldOnSave(transport);
+                          });
+                        }
+
+                        checkout.ajaxFailure = function (data) {
+                          LunarLogger.log("Failed to save order - ajax request failed");
+                          oldOnFail(data);
+                        };
+
+                        review.oldSave();
+                    });
+                } else {
+                    var message = '';
+                    if (lunarCONFIG.payment_mode == 'test') {
+                        message = 'The Lunar test Public key has not been set';
+                    } else {
+                        message = 'The Lunar Public key has not been set';
+                    }
+                    showError(message);
+                }
+            } else {
+              if (oldPlaceOrder?.call) {
+                oldPlaceOrder();
+              } else {
+                review.oldSave();
+              }
+            }
+        }
+    </script>
+    <input type="hidden" id="lunar-transaction-id" name="payment[lunar_transaction_id]"/>
+    <?php
+}

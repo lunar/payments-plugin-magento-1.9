@@ -1,0 +1,26 @@
+<?php
+
+$quote = Mage::getSingleton('checkout/cart')->getQuote();
+$lunar_helper = Mage::helper('lunar_payment');
+$grand_total = $this->helper('checkout/cart')->getQuote()->getGrandTotal();
+$currency_code = Mage::app()->getStore()->getCurrentCurrencyCode();
+$lunar        = Mage::getModel( 'lunar_payment/lunarmobilepay' );
+$client         = $lunar->getClient(); // load vendor
+$currencies     = new Lunar_Data_Currencies();
+$email = $quote->getBillingAddress()->getEmail();
+$name = $quote->getBillingAddress()->getName();
+
+if ( ! $email ) { $email = $quote->getCustomerEmail(); }
+if ( ! $name ) { $name = $quote->getCustomerName(); }
+
+?>
+
+<script class="text/javascript">
+    lunarMobilePayVAR.tax = '<?php echo Mage::helper('checkout')->getQuote()->getShippingAddress()->getData('tax_amount'); ?>';
+    lunarMobilePayVAR.amountlunar = <?php echo $currencies->ceil($grand_total, $currency_code) ?>;
+    lunarMobilePayVAR.telephone = '<?php echo $lunar_helper->getTelephone(); ?>';
+    lunarMobilePayVAR.address = '<?php echo $lunar_helper->getAddress(); ?>';
+    lunarMobilePayVAR.email = '<?php echo $email; ?>';
+    lunarMobilePayVAR.name = '<?php echo $name; ?>';
+    window.lunarMobilePaySelectedMethodOfShipping = '<?php echo Mage::helper('checkout')->getQuote()->getShippingAddress()->getShippingMethod(); ?>';
+</script>

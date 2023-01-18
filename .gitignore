@@ -1,11 +1,8 @@
-.settings
-.git
+logs
 .idea
-*.iml
-.vscode
-.DS_Store
-reports/*
+.env
+.env.production
 vendor
-buildInfo.json
-/.shuttle/
-/.dockerignore
+node_modules
+cypress.env.json
+.DS_Store

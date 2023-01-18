@@ -1,0 +1,11 @@
+<config>
+    <modules>
+        <Lunar_Payment>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Payment/>
+            </depends>
+        </Lunar_Payment>
+    </modules>
+</config>

@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<package>
+    <name>Lunar_Payment</name>
+    <version>1.0.0</version>
+    <stability>devel</stability>
+    <license>Massachusetts Institute of Technology License</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Lunar payment gateway integration</summary>
+    <description>Lunar payment gateway integration</description>
+    <notes></notes>
+    <authors>
+        <author>
+            <name>Lunar app</name>
+            <user>lunarway</user>
+            <email>hello@lunar.app</email>
+        </author>
+    </authors>
+    <date>2023-01-09</date>
+    <time>20:06:16</time>
+    <contents>
+        <target name="magecommunity">
+            <dir name="Lunar">
+                <dir name="Payment">
+                    <dir name="Block">
+                        <dir name="Form">
+                            <file name="Lunar.php" hash="51cbd97d5c8e0f3603d444d667ade806"/>
+                            <file name="Lunarmobilepay.php" hash="67646014858f79411f24e737ef1965f5"/>
+                        </dir>
+                        <dir name="Info">
+                            <file name="Lunar.php" hash="b8cd8df814af82a9f231793d4ba3c393"/>
+                            <file name="Lunarmobilepay.php" hash="564cc0689e549d2f0b681b80ed2d055f"/>
+                        </dir>
+                    </dir>
+                    <dir name="Helper">
+                        <file name="Data.php" hash="da222999ee04b1386a7e7743c213f500"/>
+                    </dir>
+                    <dir name="Model">
+                        <dir name="Config">
+                            <dir name="Backend">
+                                <file name="CheckoutMode.php" hash="0e20772ff63eff6f924e675dda901cd7"/>
+                                <file name="LiveApiKey.php" hash="88afd7e612cae284889c16aedb1b1c87"/>
+                                <file name="LiveAppKey.php" hash="775d12cfb6064e34da747a19b56a2bac"/>
+                                <file name="MobilePayConfigId.php" hash="c76d957b6694ef00760e99f4aae1b933"/>
+                                <file name="MobilePayLogoUrl.php" hash="446f8c74ffde83531f618fd956fd012f"/>
+                                <file name="PaymentMode.php" hash="ced86d696781981156518a7675720ff2"/>
+                                <file name="TestApiKey.php" hash="a49abee8d690d2be9e8b4621c6959cfe"/>
+                                <file name="TestAppKey.php" hash="81192a3d58ed588330b93fe08c8cd72f"/>
+                            </dir>
+                            <dir name="Validator">
+                                <file name="Keys.php" hash="3d452b695818c62d260527ce13ba0378"/>
+                            </dir>
+                        </dir>
+                        <file name="Lunar.php" hash="78e49fd114eb85348a3a74a80cc922d2"/>
+                        <file name="LunarPaymentAbstract.php" hash="140a5684ca70d431401f56f9a5a204e5"/>
+                        <file name="Lunaradmin.php" hash="01bd35d923bda9b473af06f155c7cf81"/>
+                        <file name="Lunarlogos.php" hash="5b912f8b08613b37a710055592aeb6b9"/>
+                        <file name="Lunarmobilepay.php" hash="89a52c797031c4c01052e487b9a76fd5"/>
+                        <file name="MobilePayObserver.php" hash="157ea02f2f23ce775f22ce93f8ead549"/>
+                        <file name="Observer.php" hash="7f7546bdc9a61b49728ffd61c6f17734"/>
+                        <dir name="Resource">
+                            <dir name="Lunaradmin">
+                                <file name="Collection.php" hash="a8cbad5bd9a8d42312c3b005732a3703"/>
+                            </dir>
+                            <file name="Lunaradmin.php" hash="bc1d4f26d510abc1c5259f0d7b5c1cd9"/>
+                            <dir name="Lunarlogos">
+                                <file name="Collection.php" hash="b3bcb4bf5ba37a2084958ebde0c1fbff"/>
+                            </dir>
+                            <file name="Lunarlogos.php" hash="8c4cf581303762eec2106f5683e83f47"/>
+                            <dir name="Mysql4">
+                                <file name="Setup.php" hash="adf17dbba1a8f8939c748e678caa0f1d"/>
+                            </dir>
+                            <file name="Setup.php" hash="a23164b673b00185035c055d6906db18"/>
+                        </dir>
+                        <dir name="Source">
+                            <file name="CheckoutMode.php" hash="cf7ba537efc4240f83c0525df0f70938"/>
+                            <file name="PaymentAction.php" hash="5ccd01f57920837c2ee30cdb181b0eda"/>
+                            <file name="PaymentLogos.php" hash="72baf860a22e0745b351d049a5ea277c"/>
+                            <file name="PaymentLogsEnabled.php" hash="879cd35824da6296e3ac84589e55af48"/>
+                            <file name="PaymentMode.php" hash="8571c7386479164179216273b02ef1dc"/>
+                            <file name="PaymentModuleStatus.php" hash="7af20c4fa90261354c2bc72db4d75f29"/>
+                        </dir>
+                    </dir>
+                    <dir name="controllers">
+                        <file name="IndexController.php" hash="9f502d126cd5aaefb2a6d401eaea5587"/>
+                        <file name="LogController.php" hash="f4c5d0fc481a1687d066657222a53986"/>
+                        <file name="MobilepayController.php" hash="8088c896f7edd47e89be69dd0e8b46b6"/>
+                    </dir>
+                    <dir name="etc">
+                        <file name="config.xml" hash="707348c2eb39ec22cc07abc3c98dec4c"/>
+                        <file name="system.xml" hash="d96a505c251238b4eaa8acbd2f4e8ee5"/>
+                    </dir>
+                    <dir name="sql">
+                        <dir name="lunar_setup">
+                            <file name="mysql4-install-1.0.0.php" hash="220b7eb4a9ca923a23e733ad605a021e"/>
+                        </dir>
+                    </dir>
+                </dir>
+            </dir>
+        </target>
+        <target name="magedesign">
+            <dir name="frontend">
+                <dir name="base">
+                    <dir name="default">
+                        <dir name="layout">
+                            <file name="lunar.xml" hash="b56cb69afa87612c983d8703fb062adf"/>
+                            <file name="lunarmobilepay.xml" hash="8da4ddb50bad24bf71cc51dc7a5f7b89"/>
+                        </dir>
+                        <dir name="template">
+                            <dir name="lunar">
+                                <file name="ajaxupdate.phtml" hash="5c44cba364cb8b03377fd4ca06419726"/>
+                                <dir name="form">
+                                    <dir name="checkout">
+                                        <dir name="agreements">
+                                            <file name="lunarmobilepay_onepage.phtml" hash="338b7f474f2cdb9696e1cf75971ed087"/>
+                                            <file name="onepage.phtml" hash="026dddfe17f24e261686c95b5c8d8302"/>
+                                        </dir>
+                                    </dir>
+                                    <file name="lunar.phtml" hash="9b52911b1330540c7465a475ff480a08"/>
+                                    <file name="lunarmobilepay.phtml" hash="6b313342e6d8ca5009ea5fb4d3bb81dd"/>
+                                </dir>
+                                <dir name="info">
+                                    <file name="lunar.phtml" hash="8c035384918bfbe3be11ad572d06a4bb"/>
+                                    <file name="lunarmobilepay.phtml" hash="8c035384918bfbe3be11ad572d06a4bb"/>
+                                </dir>
+                                <file name="mobilepay_ajaxupdate.phtml" hash="5918f0d067a5ca5f455946c15bf6a2e8"/>
+                            </dir>
+                        </dir>
+                    </dir>
+                </dir>
+            </dir>
+            <dir name="adminhtml">
+                <dir name="default">
+                    <dir name="default">
+                        <dir name="layout">
+                            <file name="lunar.xml" hash=""/>
+                        </dir>
+                    </dir>
+                </dir>
+            </dir>
+        </target>
+        <target name="mageskin">
+            <dir name="frontend">
+                <dir name="lunar">
+                    <file name="loading.gif" hash="9e0373c2b4410c49439dfd822c5fd16e"/>
+                    <file name="logo.png" hash="abf63409f6beb49411bdb032cb278c52"/>
+                    <dir name="logos">
+                        <file name="mastercard-maestro.svg" hash="0fd89a649641e8a78e78639561cfa636"/>
+                        <file name="mastercard.svg" hash="59733d973a5aec426f5eddfe52d45c85"/>
+                        <file name="mobilepay-logo.png" hash="35522550edf2982a6b576710d581d14e"/>
+                        <file name="visa-electron.svg" hash="d0ec76f9f0c752170afde93ba2519efb"/>
+                        <file name="visa.svg" hash="4ae45851ba69841de359576fee00df6c"/>
+                    </dir>
+                </dir>
+            </dir>
+        </target>
+        <target name="mageetc">
+            <dir name="modules">
+                <file name="Lunar_Payment.xml" hash="793488540d4a738ad6ad0b6042106045"/>
+            </dir>
+        </target>
+        <target name="magelocale">
+            <dir name="en_US">
+                <file name="Lunar_Payment.csv" hash="3f710d50f5e5542ab56972eaf4d23ae1"/>
+            </dir>
+        </target>
+        <target name="magelib">
+            <dir name="Lunar">
+                <dir name="Data">
+                    <file name="Currencies.php" hash="2912d031037035ff6503724ca8626694"/>
+                </dir>
+                <dir name="Endpoint">
+                    <file name="Apps.php" hash="a28b6e02115cb81677400c2c3b8ae473"/>
+                    <file name="Cards.php" hash="fbb64fc1f57e27f53d4a8f485a6e1a2d"/>
+                    <file name="Endpoint.php" hash="2ed3c8fc5cd0f8de4f5871db09b62148"/>
+                    <file name="Merchants.php" hash="68e4439109427053c99e3bfe7ab7c92d"/>
+                    <file name="Transactions.php" hash="d498429782768c6e7e405d4d10a662c1"/>
+                </dir>
+                <dir name="Exception">
+                    <file name="ApiConnection.php" hash="379235e7924662dd778034ef654e09a5"/>
+                    <file name="ApiException.php" hash="c2022162539e0f9cfed4a156977e7620"/>
+                    <file name="Conflict.php" hash="c273e9f91f9e8a48185559a38c4f27e5"/>
+                    <file name="Forbidden.php" hash="66e108521b8c8adf0b7e8f2e1a107126"/>
+                    <file name="InvalidRequest.php" hash="59398e443cfed1d242fdef6e946dd9b0"/>
+                    <file name="NotFound.php" hash="8b8b591ff42a5d73262bc0524344d87c"/>
+                    <file name="Unauthorized.php" hash="1175af095ea9500f934e91891e7426d9"/>
+                </dir>
+                <dir name="HttpClient">
+                    <file name="CurlClient.php" hash="f30904d83587ee0fed54da871105d74c"/>
+                    <file name="HttpClientInterface.php" hash="2f4a450006e38845ed43f4f8ce808276"/>
+                </dir>
+                <file name="Lunar.php" hash="d155b055daee771a114f0adf156b4b17"/>
+                <dir name="Response">
+                    <file name="ApiResponse.php" hash="63dd905e840102cff691b6b5ee4ac536"/>
+                </dir>
+                <dir name="Utils">
+                    <file name="Cursor.php" hash="b1de4c15313908c4955984a598a2b22e"/>
+                </dir>
+            </dir>
+        </target>
+    </contents>
+    <compatible/>
+    <dependencies>
+        <required>
+            <php>
+                <min>5.4.0</min>
+                <max>7.3.33</max>
+            </php>
+        </required>
+    </dependencies>
+</package>

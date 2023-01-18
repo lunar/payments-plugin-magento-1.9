@@ -1,0 +1,840 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <payment>
+            <groups>
+                <lunar translate="label" module="lunar_payment">
+                    <label>Lunar Payment</label>
+                    <sort_order>1000</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <status translate="label">
+                            <label>Status</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentModuleStatus</source_model>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </status>
+
+                        <title translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Payment method title
+                            </label>
+                            <comment>Payment method title</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry</validate>
+                        </title>
+
+                        <payment_logo translate="label">
+                            <label>Payment method credit card logos</label>
+                            <comment>
+                                Choose a logo to show in frontend checkout page.
+                                <![CDATA[
+                                    <strong>
+                                        <a href="javascript:void(0);" id="add_logo" title="Add your own logo" style="
+                                            color: #fff;
+                                            font-size: 18px;
+                                            border-radius: 14px;
+                                            background-color: #00aff0;
+                                            padding: 0 5px 0 4px;
+                                            text-align: center;
+                                            text-decoration: none;
+                                            display: inline-block;
+                                            position: relative;
+                                            top: 3px;
+                                        ">+</a>
+                                    </strong>
+
+                                    <div id="logo_upload_popup" style="
+                                        display:none;
+                                        height: auto;
+                                        width: auto;
+                                        z-index: 1000;
+                                        background-color: #fff;
+                                        box-shadow: 0px 5px 10px #888888;
+                                        position: absolute;
+                                    ">
+                                        <div id="logo_upload_popup_header" style="
+                                            background-color: #6f8992;
+                                            color: #fff;
+                                            font-size: 1em;
+                                            line-height: 18px;
+                                            min-height: 0;
+                                            font-weight: bold;
+                                        ">
+                                            <span style="font-weight: 600; padding-left: 10px;">New logo</span>
+                                            <span style="float: right; padding-right: 5px;">
+                                                <a href="javascript:void(0);" class="close" style="color: #fff; text-decoration: none;">X</a>
+                                            </span>
+                                        </div>
+                                        <div id="logo_upload_popup_body" style="
+                                            padding: 20px;
+                                        ">
+                                            <div id="logo_upload_popup_message" style="margin-bottom: 10px; display: none;"></div>
+                                            <div style="margin-bottom: 10px;">
+                                                <label style="font-weight: 600; width:70px; display:inline-block">Logo name</label>
+                                                <input type="text" name="logo_name" style="width:75%"/>
+                                            </div>
+                                            <div>
+                                                <label style="font-weight: 600; width:70px; display:inline-block">Logo</label>
+                                                <input type="file" name="logo_file" />
+                                            </div>
+                                        </div>
+                                        <div id="logo_upload_popup_footer" style="
+                                            padding: 5px;
+                                            border-top: 1px solid #000;
+                                            height: 20px;
+                                        ">
+                                            <div style="float: right;">
+                                                <button type="button" id="save_logo">Save</button>
+                                                <button type="button" class="close">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+                                    <script type="text/javascript">
+                                        $.noConflict();
+                                        jQuery( document ).ready(function( $ ) {
+                                            jQuery('#add_logo').on('click', addLogoClickHandler);
+                                            jQuery('.close').on('click', closeBtnClickHandler);
+                                            jQuery('#save_logo').on('click', ajaxSaveLogo);
+                                        });
+                                        function addLogoClickHandler() {
+                                            jQuery('#logo_upload_popup').show();
+                                        }
+                                        function closeBtnClickHandler() {
+                                            jQuery("#logo_upload_popup").hide();
+                                        }
+                                        function ajaxSaveLogo(e) {
+                                            jQuery(e.currentTarget).attr('disabled', 'disabled').text('Please wait ...');
+                                            jQuery("#logo_upload_popup_message").html('').hide();
+                                            var logo_name = jQuery('input[name="logo_name"]').val();
+                                            var logo_file = jQuery('input[name="logo_file"]');
+                                            logo_file = (logo_file[0].files.length > 0) ? logo_file[0].files[0] : null;
+                                            var formData = new FormData();
+                                            formData.append('logo_name', logo_name);
+                                            formData.append('logo_file', logo_file);
+                                            jQuery.ajax({
+                                                url: '../../../../../../../lunar/index/uploadLogo',
+                                                type: 'POST',
+                                                data: formData,
+                                                contentType: false,
+                                                cache: false,
+                                                processData:false,
+                                                enctype: 'multipart/form-data',
+                                                success: function(response) {
+                                                    //console.log(response);
+                                                    jQuery(e.currentTarget).removeAttr('disabled').text('Save');
+                                                    var style = 'color:green';
+                                                    if(response.status == 0) {
+                                                        style = 'color:red';
+                                                    }
+                                                    var html = '<span style="' + style + '">' + response.message + '</span>';
+                                                    jQuery("#logo_upload_popup_message").html(html).show();
+
+                                                    if(response.status == 1) {
+                                                        window.location = window.location;
+                                                    }
+                                                },
+                                                error: function(response) {
+                                                    //console.log(response);
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                ]]>
+                            </comment>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>lunar_payment/source_paymentLogos</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </payment_logo>
+
+                        <description translate="label">
+                            <label>Payment method description</label>
+                            <comment>Payment method description</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </description>
+
+                        <pop_up_title translate="label">
+                            <label>Payment popup title</label>
+                            <comment>
+                                The text shown in the popup where the customer inserts the card details
+                            </comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </pop_up_title>
+
+
+                        <payment_mode translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Transaction mode
+                            </label>
+                            <comment>In test mode, you can create a successful transaction with the card number
+                                4100 0000 0000 0000 with any CVC and a valid expiration date.
+                            </comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentMode</source_model>
+                            <backend_model>lunar_payment/config_backend_paymentMode</backend_model>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </payment_mode>
+
+                        <test_public_key translate="label">
+                            <label><![CDATA[<strong><span style="color: red;">* </span></strong>]]> Test mode Public Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_testApiKey</backend_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>test</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </test_public_key>
+
+                        <test_api_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Test mode App Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_testAppKey</backend_model>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>test</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </test_api_key>
+
+                        <live_public_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Public Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_liveApiKey</backend_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>live</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </live_public_key>
+
+                        <live_api_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> App Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_liveAppKey</backend_model>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>live</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </live_api_key>
+
+                        <payment_action translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Capture mode
+                            </label>
+                            <comment>If you deliver your product instantly (e.g. a digital product), choose Instant
+                                mode. If not, use Delayed. In Delayed mode you can use the lunar tool on the order
+                                edit screen to do the capture.
+                            </comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentAction</source_model>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </payment_action>
+
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sort_order>
+
+                        <allowspecific translate="label">
+                            <label>Payment from applicable countries</label>
+                            <frontend_type>allowspecific</frontend_type>
+                            <source_model>adminhtml/system_config_source_payment_allspecificcountries</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <sort_order>35</sort_order>
+                        </allowspecific>
+
+                        <specificcountry translate="label">
+                            <label>Payment from Specific countries</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <sort_order>40</sort_order>
+                        </specificcountry>
+
+                        <logs_enabled translate="label">
+                            <label>Enable logs</label>
+                            <comment>
+                              <![CDATA[
+                                <style>
+                                  #lunar_buttons_container {
+                                    display: flex;
+                                    flex-direction: row;
+                                    width: 280px;
+                                    justify-content: space-between;
+                                    margin-top: 12px;
+                                  }
+
+                                  #lunar_logs_message {
+                                    margin-top: 8px;
+                                  }
+                                </style>
+                                <script type="text/javascript">
+                                  jQuery(document).ready(function () {
+                                    const logsEnabledSelector = jQuery("#payment_lunar_logs_enabled");
+                                    logsEnabledSelector.attr("disabled", true);
+                                    jQuery.ajax({
+                                      url: "../../../../../../../lunar/log/writtable",
+                                      success: function (data) {
+                                        const response = JSON.parse(data);
+                                        if (response.writable) {
+                                          jQuery("#not-writable").remove();
+                                          logsEnabledSelector.attr("disabled", false);
+                                        } else {
+                                          logsEnabledSelector.val("0");
+                                          logsEnabledSelector.attr("disabled", true);
+                                          logsEnabledSelector.after('<p id="not-writable" class="note" style="color: red; margin-top: 8px;">Cannot enable logs right now<br />Please make sure the following directory is writable:<br /><pre><small>'+response.dir+'</small></pre></p>');
+                                        }
+                                      },
+                                    });
+
+                                    logsEnabledSelector.after(`
+                                      <div id="lunar_buttons_container">
+                                        <button id="lunar_export_button" disabled>Export logs</button>
+                                        <button id="lunar_delete_button" disabled>Delete logs</button>
+                                      </div>
+                                      <p id="lunar_logs_message"></p>
+                                    `);
+
+                                    const exportButton = jQuery("#lunar_export_button");
+                                    const deleteButton = jQuery("#lunar_delete_button");
+                                    const message = jQuery("#lunar_logs_message");
+
+                                    function download(filename, content) {
+                                        var a = document.createElement('a');
+                                        a.setAttribute('href', 'data:application/zip;base64, ' + content);
+                                        a.setAttribute('download', filename);
+                                        a.click();
+                                    }
+
+                                    function checkForLogs() {
+                                      jQuery.ajax({
+                                        url: "/index.php/lunar/log/hasLogs",
+                                        type: 'POST',
+                                        dataType: 'text',
+                                        data: { "hasLogs": 1 },
+                                        success: function (data) {
+                                          if (!data) {
+                                            exportButton.attr("disabled", true);
+                                            deleteButton.attr("disabled", true);
+                                            message.html("No logs saved");
+                                          } else {
+                                            exportButton.attr("disabled", false);
+                                            deleteButton.attr("disabled", false);
+                                            message.html("");
+                                          }
+                                        }
+                                      });
+                                    }
+
+                                    checkForLogs();
+
+                                    deleteButton.on("click", (event) => {
+                                      event.preventDefault();
+
+                                      if (!confirm("Are you sure you want to delete the logs?")) {
+                                        return;
+                                      }
+
+                                      deleteButton.attr("disabled", true);
+                                      deleteButton.html("Loading...");
+
+                                      jQuery.ajax({
+                                        url: "/index.php/lunar/log/deleteLogs",
+                                        type: 'POST',
+                                        dataType: 'text',
+                                        data: { "delete": 1 },
+                                        success: function (data) {
+                                          message.html("Logs deleted");
+                                          deleteButton.html("Delete logs");
+
+                                          setTimeout(checkForLogs, 5000);
+                                        }
+                                      });
+                                    });
+
+                                    exportButton.on("click", (event) => {
+                                      event.preventDefault();
+
+                                      exportButton.attr("disabled", true);
+                                      exportButton.html("Loading...");
+
+                                      jQuery.ajax({
+                                        url: "/index.php/lunar/log/export",
+                                        type: 'POST',
+                                        dataType: 'text',
+                                        data: { "export": 1 },
+                                        success: function (data) {
+                                          download("lunarLogs.zip", data);
+
+                                          exportButton.attr("disabled", false);
+                                          exportButton.html("Export logs");
+                                        }
+                                      });
+                                    });
+                                  });
+                                </script>
+                              ]]>
+                            </comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentLogsEnabled</source_model>
+                            <sort_order>41</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </logs_enabled>
+
+                    </fields>
+                </lunar>
+
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- +++++++++++++++++++++++++++++++++++++++++++++ LUNAR MOBILE PAY CONFIG FIELDS ++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+                <lunarmobilepay translate="label" module="lunar_payment">
+                    <label>Lunar Mobile Pay</label>
+                    <sort_order>2000</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <status translate="label">
+                            <label>Status</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentModuleStatus</source_model>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </status>
+
+                        <title translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Payment method title
+                            </label>
+                            <comment>Payment method title</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry</validate>
+                        </title>
+
+                        <logo_url translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Logo URL
+                            </label>
+                            <comment>
+                                URL must start with "https://", and the image must have PNG, JPG, JPEG extension.
+                            </comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_mobilePayLogoUrl</backend_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry</validate>
+                        </logo_url>
+
+                        <description translate="label">
+                            <label>Payment method description</label>
+                            <comment>Payment method description</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </description>
+
+                        <checkout_mode translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Checkout mode</label>
+                            <comment>The possibility to pay before or after creating the order</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_checkoutMode</source_model>
+                            <backend_model>lunar_payment/config_backend_checkoutMode</backend_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </checkout_mode>
+
+                        <payment_mode translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Transaction mode
+                            </label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentMode</source_model>
+                            <backend_model>lunar_payment/config_backend_paymentMode</backend_model>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </payment_mode>
+
+                        <test_public_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Test mode Public Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_testApiKey</backend_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>test</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </test_public_key>
+
+                        <test_api_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Test mode App Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_testAppKey</backend_model>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>test</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </test_api_key>
+
+                        <live_public_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Public Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_liveApiKey</backend_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>live</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </live_public_key>
+
+                        <live_api_key translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> App Key
+                            </label>
+                            <comment>Get it from your Lunar dashboard</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_liveAppKey</backend_model>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <payment_mode>live</payment_mode>
+                            </depends>
+                            <validate>required-entry</validate>
+                        </live_api_key>
+
+                        <configuration_id translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> MobilePay Configuration ID
+                            </label>
+                            <comment>Email onlinepayments@lunar.app to get it</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>lunar_payment/config_backend_mobilePayConfigId</backend_model>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry</validate>
+                        </configuration_id>
+
+                        <payment_action translate="label">
+                            <label>
+                                <![CDATA[<strong><span style="color: red;">* </span></strong>]]> Capture mode
+                            </label>
+                            <comment>If you deliver your product instantly (e.g. a digital product), choose Instant
+                                mode. If not, use Delayed. In Delayed mode you can use the lunar tool on the order
+                                edit screen to do the capture.
+                            </comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentAction</source_model>
+                            <sort_order>13</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </payment_action>
+
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sort_order>
+
+                        <allowspecific translate="label">
+                            <label>Payment from applicable countries</label>
+                            <frontend_type>allowspecific</frontend_type>
+                            <source_model>adminhtml/system_config_source_payment_allspecificcountries</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <sort_order>35</sort_order>
+                        </allowspecific>
+
+                        <specificcountry translate="label">
+                            <label>Payment from Specific countries</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <sort_order>40</sort_order>
+                        </specificcountry>
+
+                        <logs_enabled translate="label">
+                            <label>Enable logs</label>
+                            <comment>
+                              <![CDATA[
+                                <style>
+                                  #lunarmobilepay_buttons_container {
+                                    display: flex;
+                                    flex-direction: row;
+                                    width: 280px;
+                                    justify-content: space-between;
+                                    margin-top: 12px;
+                                  }
+
+                                  #lunarmobilepay_logs_message {
+                                    margin-top: 8px;
+                                  }
+                                </style>
+                                <script type="text/javascript">
+                                  jQuery(document).ready(function () {
+                                    const lunarmobilepayLogsEnabledSelector = jQuery("#payment_lunarmobilepay_logs_enabled");
+                                    lunarmobilepayLogsEnabledSelector.attr("disabled", true);
+                                    jQuery.ajax({
+                                      url: "../../../../../../../lunar/log/writtable", // @TODO change folder name after implementation
+                                      success: function (data) {
+                                        const response = JSON.parse(data);
+                                        if (response.writable) {
+                                          jQuery("#not-writable").remove();
+                                          lunarmobilepayLogsEnabledSelector.attr("disabled", false);
+                                        } else {
+                                          lunarmobilepayLogsEnabledSelector.val("0");
+                                          lunarmobilepayLogsEnabledSelector.attr("disabled", true);
+                                          lunarmobilepayLogsEnabledSelector.after('<p id="not-writable" class="note" style="color: red; margin-top: 8px;">Cannot enable logs right now<br />Please make sure the following directory is writable:<br /><pre><small>'+response.dir+'</small></pre></p>');
+                                        }
+                                      },
+                                    });
+
+                                    lunarmobilepayLogsEnabledSelector.after(`
+                                      <div id="lunarmobilepay_buttons_container">
+                                        <button id="lunarmobilepay_export_button" disabled>Export logs</button>
+                                        <button id="lunarmobilepay_delete_button" disabled>Delete logs</button>
+                                      </div>
+                                      <p id="lunarmobilepay_logs_message"></p>
+                                    `);
+
+                                    const lunarmobilepayExportButton = jQuery("#lunarmobilepay_export_button");
+                                    const lunarmobilepayDeleteButton = jQuery("#lunarmobilepay_delete_button");
+                                    const lunarmobilepayMessage = jQuery("#lunarmobilepay_logs_message");
+
+                                    function download(filename, content) {
+                                        var a = document.createElement('a');
+                                        a.setAttribute('href', 'data:application/zip;base64, ' + content);
+                                        a.setAttribute('download', filename);
+                                        a.click();
+                                    }
+
+                                    function checkForLogs() {
+                                      jQuery.ajax({
+                                        url: "/index.php/lunar/log/hasLogs",
+                                        type: 'POST',
+                                        dataType: 'text',
+                                        data: { "hasLogs": 1 },
+                                        success: function (data) {
+                                          if (!data) {
+                                            lunarmobilepayExportButton.attr("disabled", true);
+                                            lunarmobilepayDeleteButton.attr("disabled", true);
+                                            lunarmobilepayMessage.html("No logs saved");
+                                          } else {
+                                            lunarmobilepayExportButton.attr("disabled", false);
+                                            lunarmobilepayDeleteButton.attr("disabled", false);
+                                            lunarmobilepayMessage.html("");
+                                          }
+                                        }
+                                      });
+                                    }
+
+                                    checkForLogs();
+
+                                    lunarmobilepayDeleteButton.on("click", (event) => {
+                                      event.preventDefault();
+
+                                      if (!confirm("Are you sure you want to delete the logs?")) {
+                                        return;
+                                      }
+
+                                      lunarmobilepayDeleteButton.attr("disabled", true);
+                                      lunarmobilepayDeleteButton.html("Loading...");
+
+                                      jQuery.ajax({
+                                        url: "/index.php/lunar/log/deleteLogs",
+                                        type: 'POST',
+                                        dataType: 'text',
+                                        data: { "delete": 1 },
+                                        success: function (data) {
+                                          lunarmobilepayMessage.html("Logs deleted");
+                                          lunarmobilepayDeleteButton.html("Delete logs");
+
+                                          setTimeout(checkForLogs, 5000);
+                                        }
+                                      });
+                                    });
+
+                                    lunarmobilepayExportButton.on("click", (event) => {
+                                      event.preventDefault();
+
+                                      lunarmobilepayExportButton.attr("disabled", true);
+                                      lunarmobilepayExportButton.html("Loading...");
+
+                                      jQuery.ajax({
+                                        url: "/index.php/lunar/log/export",
+                                        type: 'POST',
+                                        dataType: 'text',
+                                        data: { "export": 1 },
+                                        success: function (data) {
+                                          download("lunarLogs.zip", data);
+
+                                          lunarmobilepayExportButton.attr("disabled", false);
+                                          lunarmobilepayExportButton.html("Export logs");
+                                        }
+                                      });
+                                    });
+                                  });
+                                </script>
+                              ]]>
+                            </comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>lunar_payment/source_paymentLogsEnabled</source_model>
+                            <sort_order>41</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </logs_enabled>
+
+                        <hide_fields translate="label">
+                            <label></label>
+                            <comment>
+                                <![CDATA[
+                                    <script type="text/javascript">
+                                        jQuery(document).ready(function () {
+                                            // self hide & disable
+                                            jQuery('#row_payment_lunarmobilepay_hide_fields').hide();
+                                            jQuery('#payment_lunarmobilepay_hide_fields').attr('disabled', 'disabled');
+
+                                            if (
+                                                "?debug" !== document.location.search
+                                                && 'test' !== jQuery(`#row_payment_lunar_payment_mode option:selected`).val()
+                                            ) {
+                                                jQuery('#row_payment_lunar_payment_mode').hide();
+                                                jQuery('#row_payment_lunar_test_public_key').hide();
+                                                jQuery('#row_payment_lunar_test_api_key').hide();
+                                            }
+
+                                            if (
+                                                "?debug" !== document.location.search
+                                                && 'test' !== jQuery(`#row_payment_lunarmobilepay_payment_mode option:selected`).val()
+                                            ) {
+                                                jQuery('#row_payment_lunarmobilepay_payment_mode').hide();
+                                                jQuery('#row_payment_lunarmobilepay_test_public_key').hide();
+                                                jQuery('#row_payment_lunarmobilepay_test_api_key').hide();
+                                            }
+                                        });
+                                    </script>
+                                ]]>
+                            </comment>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </hide_fields>
+                    </fields>
+                </lunarmobilepay>
+
+
+            </groups>
+        </payment>
+    </sections>
+</config>
