@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<layout version="1.0.0">
+    <checkout_onepage_review>
+        <reference name="checkout.onepage.agreements">
+            <action method="setTemplate">
+                <template>lunar/form/checkout/agreements/lunarmobilepay_onepage.phtml</template>
+            </action>
+        </reference>
+    </checkout_onepage_review>
+
+    <onestepcheckout_payment_review_material_20columns>
+        <reference name="review_info">
+            <block type="core/template" name="lunarmobilepay.updated.total.block" template="lunar/mobilepay_ajaxupdate.phtml"  />
+        </reference>
+    </onestepcheckout_payment_review_material_20columns>
+
+	<checkout_onestep_index>
+        <reference name="checkout.onepage.agreements">
+            <action method="setTemplate">
+                <template>lunar/form/checkout/agreements/lunarmobilepay_onepage.phtml</template>
+            </action>
+        </reference>
+    </checkout_onestep_index>
+
+</layout>

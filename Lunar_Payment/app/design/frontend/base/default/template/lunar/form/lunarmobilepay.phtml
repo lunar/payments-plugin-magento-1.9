@@ -1,0 +1,566 @@
+<?php
+
+    $quote          = Mage::getSingleton( 'checkout/cart' )->getQuote();
+    $lunar_helper   = Mage::helper( 'lunar_payment' );
+
+    $lunar_helper->setPaymentMethodCode('lunarmobilepay');
+
+    $fakeTxnId      = $lunar_helper::FAKE_TXN_ID;
+
+    $lunarmobilepay = Mage::getModel( 'lunar_payment/lunarmobilepay' );
+    $client         = $lunarmobilepay->getClient(); // load vendor
+    $currencies     = new Lunar_Data_Currencies();
+    $grand_total    = $this->helper( 'checkout/cart' )->getQuote()->getGrandTotal();
+    $currency_code  = Mage::app()->getStore()->getCurrentCurrencyCode();
+    $email          = $quote->getBillingAddress()->getEmail();
+    $name           = $quote->getBillingAddress()->getName();
+
+
+    if ( ! $email ) { $email = $quote->getCustomerEmail(); }
+    if ( ! $name ) { $name = $quote->getCustomerName(); }
+
+    if ($lunar_helper->getStatus()) { ?>
+
+        <style type="text/css">
+            .lunarmobilepay-logo {
+                height: 40px;
+                margin: 0 10px;
+            }
+
+            label[for="p_method_lunarmobilepay"] span {
+                float: left;
+                margin-right: 10px;
+                margin-top: 8px;
+            }
+
+            label[for="p_method_lunarmobilepay"] p {
+                clear: both;
+            }
+
+            label[for="p_method_lunarmobilepay"] a {
+                margin-top: 0;
+            }
+
+            input[id="p_method_lunarmobilepay"] {
+                margin-top: 2.5rem !important;
+            }
+
+        </style>
+
+
+        <script type="text/javascript">
+        window.LunarLogger = {
+            setContext: function () {},
+            log: function() {},
+        };
+
+        <?php if ($lunar_helper->getLogsEnabled() == "1") { ?>
+
+            jQuery.ajax({
+            url: "/index.php/lunar/log/writtable",
+            success: function (data) {
+                const response = JSON.parse(data);
+                if (response.writable) {
+                window.LunarLogger = {
+                    date: new Date().getTime(),
+                    context: {},
+                    setContext: function(context) {
+                    this.context = context;
+                    },
+                    log: function(message, data = {}) {
+                    const body = {
+                        message,
+                        data,
+                        date: this.date,
+                        context: this.context,
+                    }
+
+                    return new Promise(function (resolve) {
+                        new Ajax.Request("/index.php/lunar/log/log", {
+                            method:'post',
+                            parameters: {
+                                data: JSON.stringify(body),
+                            },
+                            onComplete: function () {
+                                resolve();
+                            },
+                        });
+                    });
+                    }
+                }
+                }
+            },
+            });
+
+        <?php } ?>
+
+        </script>
+
+        <script type="text/javascript">
+            document.getElementById('p_method_lunarmobilepay').checked = false;
+
+            let lunarmobilepay_method_title = jQuery('#p_method_lunarmobilepay').parents('dt').find('label[for="p_method_lunarmobilepay"]').text().replace(/^\s+|\s+$/g, '');
+            let lunarMobilePayHtml = '<span>' + lunarmobilepay_method_title + '</span>';
+            lunarMobilePayHtml += '<img src="<?php echo  $lunar_helper->getCheckoutMobilePayLogoUrl(); ?>" alt="Lunar Mobile Pay" title="Lunar MobilePay" class="v-middle lunarmobilepay-logo" />';
+            lunarMobilePayHtml += '<p><?php echo  $lunar_helper->getPaymentMethodDescription(); ?></p>';
+
+            let lunarMobilePayRadioButton = jQuery('#p_method_lunarmobilepay').parents('dt').find('label[for="p_method_lunarmobilepay"]');
+            let lunarMobilePayRadioButtonText = lunarMobilePayRadioButton.html().replace(/Lunar\ Mobile\ Pay/g, '');
+
+            lunarMobilePayRadioButtonText = lunarMobilePayRadioButtonText.replace(new RegExp(lunarmobilepay_method_title, "g"), '');
+            lunarMobilePayRadioButton.html(lunarMobilePayRadioButtonText + lunarMobilePayHtml);
+
+
+            function lunarMobilePaySelected() {
+                return jQuery("#p_method_lunarmobilepay").is(":checked");
+            };
+
+            jQuery("input:radio").change(function () {
+                if ( ! lunarMobilePaySelected()) {
+                    lunarMobilePayClearError();
+                }
+            });
+
+            function lunarMobilePayClearError() {
+                if (jQuery('#errorMessage-lunarmobilepay').length > 0) {
+                    jQuery('#errorMessage-lunarmobilepay').remove();
+                }
+            };
+
+            function showError(message) {
+                lunarMobilePayClearError();
+                if (message != '') {
+                    let html = '<div id="errorMessage-lunarmobilepay" style="color: #ff0000; font-size: 13px; font-weight: normal;">' + message + '</div>';
+                    jQuery('#p_method_lunarmobilepay').parents('dt').append(html);
+                }
+            };
+
+            /**
+             * CONFIG DATA
+             */
+            let lunarMobilePayCONFIG = {
+                    checkout_mode: '<?php echo  $lunar_helper->getCheckoutMode(); ?>',
+                    payment_mode: '<?php echo  $lunar_helper->getPaymentMode(); ?>',
+                    publicKey: '<?php echo  $lunar_helper->getPublicKey(); ?>',
+                    notReadyMessage: '<?php echo  Mage::helper( 'lunar_payment' )->getAlertOnNotReady(); ?>',
+                    oscVersion: '<?php echo  Mage::getConfig()->getNode( 'modules/Magestore_Onestepcheckout/version' ); ?>',
+
+                    locale: '<?php echo  Mage::app()->getLocale()->getLocaleCode(); ?>',
+                    currency: '<?php echo  $currency_code; ?>',
+                    amount: '<?php echo  $grand_total; ?>',
+                    exponent: <?php echo  $currencies->getCurrency( $currency_code )['exponent'] ?>,
+                    quoteId: '<?php echo  $this->helper( 'checkout/cart' )->getQuote()->getId(); ?>',
+                    products: '<?php echo  $lunar_helper->getProducts( true ); ?>',
+                    customerIp: '<?php echo  Mage::helper( 'core/http' )->getRemoteAddr(); ?>',
+                    platform_version: '<?php echo  Mage::getVersion(); ?>',
+                    plugin_version: '<?php echo  Mage::getConfig()->getNode( 'modules/Lunar_Payment/version' ); ?>'
+            };
+
+
+            window.lunarmobilepaySelectedMethodOfShipping = '<?php echo  Mage::helper( 'checkout' )->getQuote()->getShippingAddress()->getShippingMethod(); ?>';
+            document.querySelector('#p_method_lunarmobilepay').addEventListener('click', lunarMobilePayPaymentSelectHandler);
+
+
+            function lunarMobilePayPaymentSelectHandler() {
+                //document.getElementById("lunarmobilepay-authorization-id").value = "5910238566b6776329301fb9";
+                document.getElementById("lunarmobilepay-authorization-id").removeAttribute("disabled");
+                // document.getElementById("lunarmobilepay-authorization-id").value = String(Math.floor((Math.random() * 1000000000000) + 1)); // added value placeholder
+            };
+
+            var $method_lunarmobilepay = jQuery('#dt_method_lunarmobilepay').find('span.no-display');
+
+            if($method_lunarmobilepay.length > 0){
+                document.getElementById('p_method_lunarmobilepay').checked = true;
+                setTimeout(function() {
+                    lunarMobilePayPaymentSelectHandler();
+                },100);
+            };
+
+            function getFormElementId() {
+                if (document.getElementById("one-step-checkout-form")) {
+                    return "one-step-checkout-form";
+                }
+
+                if (document.getElementById("amscheckout-onepage")) {
+                    return "amscheckout-onepage";
+                }
+            };
+
+            let mageOldPlaceOrder = undefined;
+            const lunarMobilePayPlaceOrder = function (element) {
+                let validator = new Validation(getFormElementId);
+                if (validator.validate()) {
+                    if (
+                        jQuery('.ajax-loader1:visible').length > 0
+                        || jQuery('.ajax-loader2:visible').length > 0
+                        || jQuery('.ajax-loader3:visible').length > 0
+                    ) {
+                        alert(lunarMobilePayCONFIG.notReadyMessage);
+                    }
+                    else {
+                        let currentShipmentCode = jQuery('input[name="shipping_method"]:checked').val();
+
+                        if (currentShipmentCode != window.lunarmobilepaySelectedMethodOfShipping) {
+                            alert(lunarMobilePayCONFIG.notReadyMessage);
+                        }
+                        else {
+                            validateLunarMobilePay(2, element);
+                        }
+                    }
+                } else {
+                    alert(lunarMobilePayCONFIG.notReadyMessage);
+                }
+            };
+
+
+            jQuery(document).ready(function ($) {
+                if (typeof window.oscPlaceOrder === 'function') {
+                    mageOldPlaceOrder = window.oscPlaceOrder;
+                    window.oscPlaceOrder = lunarMobilePayPlaceOrder
+                }
+
+                if (typeof window.completeCheckout === 'function') {
+                    mageOldPlaceOrder = window.completeCheckout;
+                    window.completeCheckout = newPlaceOrder;
+                }
+            });
+
+            // fix bug in one page checkout and one step checkout
+            if (typeof review == 'undefined' || typeof review.oldSaveLunarMobilePay == 'undefined') {
+                Review.prototype.oldSaveLunarMobilePay = Review.prototype.save;
+            }
+
+            Review.prototype.save = function() {
+                if( typeof review == 'undefined' || typeof review.form == 'undefined') {
+                    validateLunarMobilePay();
+                } else {
+                    if (new Validation(review.form).validate()) {
+                        validateLunarMobilePay();
+                    }
+                }
+            };
+
+
+            /**
+             * PREPARE VARS
+             */
+            let lunarMobilePayVAR = {
+                tax: '<?php echo  Mage::helper( 'checkout' )->getQuote()->getShippingAddress()->getData( 'tax_amount' ); ?>',
+                telephone: '<?php echo  $lunar_helper->getTelephone(); ?>',
+                address: '<?php echo  $lunar_helper->getAddress(); ?>',
+                email: '<?php echo  $email; ?>',
+                name: '<?php echo  $name; ?>',
+                amountlunar: <?php echo $currencies->ceil($grand_total, $currency_code) ?>
+            };
+
+            // automated testing purposes
+            window.lunarmobilepayminoramount = lunarMobilePayVAR.amountlunar;
+
+
+            /**
+             **********************************************************
+             ******************** LUNAR MOBILEPAY HANDLER ************
+             **********************************************************
+             */
+            let LUNAR_MOBILEPAY_HANDLER = {
+                lastIframeId: 0,
+                iframeChallenges: [],
+                hints: [],
+                beforeOrder: true,
+				paymentButtonSelector: '#review-buttons-container > .btn-checkout',
+                redirectUrl: window.location.origin + '/checkout/onepage/success',
+
+                /**
+                 * server call
+                 */
+                initiatePaymentServerCall: function(args, success) {
+                    var self = this;
+
+                    args.hints = self.hints;
+
+                    jQuery.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        url: "/lunar/mobilepay",
+                        data: {
+                            args: args,
+                        },
+                        success: function(data) {
+                            success(data)
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            LunarLogger.log("Error occurred on server call: " + errorThrown);
+
+                            self.submitError(errorThrown);
+                        },
+                        always: function() {
+                            //
+                        }
+                    });
+                },
+
+                addIframeEventListener: function() {
+                    var self = this;
+
+                    window.addEventListener('message', function(e) {
+                        for (var key in self.iframeChallenges) {
+                            var challenge = self.iframeChallenges[key];
+                            if (challenge.iframe[0].contentWindow !== e.source) {
+                                continue;
+                            }
+                            if (typeof e.data !== 'object' || e.data === null || ! e.data.hints) {
+                                continue;
+                            }
+                            challenge.resolve(e.data)
+                            self.resetIframe(challenge);
+                        }
+                    })
+                },
+
+                showMobilePayIframe: function(response) {
+                    var self = this;
+
+                    var width = response.width ?? 1;
+                    var height = response.height ?? 1;
+                    var method = response.method ?? 'GET';
+                    var action = response.action ?? undefined;
+                    var fields = response.fields ?? [];
+                    var name = 'challenge-iframe';
+                    var display = response.type === 'background-iframe' ? 'none' : 'block';
+                    var src = method === 'GET' ? response.url : undefined;
+                    var style = 'border: none; width: ' + width + 'px;height: ' + height + 'px;maxWidth:100%' + ';display:' + display + ';';
+                            // style += 'border:solid 2px #000;'; // if needed
+                    var $iframe = jQuery('<iframe name="' + name + '" class="lunarmobilepay-iframe" src="' + src + '" style="' + style + '" frameborder="0" allowfullscreen></iframe>');
+                    var $cancel = jQuery('<button class="lunarmobilepay-cancel-button" style="margin:5px 0;" type="button">Cancel</button>');
+
+                    var iframeChallenge = {
+                        iframe: $iframe, resolve: function(data) {
+                            self.hints = self.hints.concat(data.hints);
+                            validateLunarMobilePay();
+                        },
+                        cancelButton: $cancel,
+                        timeout: response.timeout ?? 1000 * 60 * 35,
+                        id: ++self.lastIframeId,
+                    }
+                    this.iframeChallenges.push(iframeChallenge);
+                    this.disablePaymentButton();
+                    this.timer = setTimeout(function() {
+                        self.resetIframe(iframeChallenge);
+                        // on timeout we try again
+                        validateLunarMobilePay();
+
+                    }, iframeChallenge.timeout)
+
+                    jQuery('#review-buttons-container').prepend($iframe);
+
+                    if (display === 'block') {
+                        jQuery('#review-buttons-container').prepend($cancel);
+                        $cancel.on('click', function(e) {
+                            e.preventDefault();
+                            self.resetIframe(iframeChallenge);
+                        });
+                    }
+
+                    if (method === 'POST') {
+                        this.handleIframePost(name, action, fields);
+                    }
+                },
+
+                handleIframePost: function(name, action, fields) {
+                    var $div = jQuery('<form method="POST" action="' + action + '" target="' + name + '"></form>');
+                    Object.entries(fields).map(function(field) {
+                        $div.append('<input type="hidden" name="' + field.name + '" value="' + field.value + '"/>');
+                    });
+                    jQuery(document.body).append($div);
+                    $div.submit()
+                    $div.remove();
+                },
+
+                resetIframe: function(iframeChallenge) {
+                    clearTimeout(this.timer);
+                    this.removeIframeChallenge(iframeChallenge);
+                },
+
+                removeIframeChallenge: function(iframeChallenge) {
+                    this.iframeChallenges = this.iframeChallenges.filter(function(object) {
+                        object.id !== iframeChallenge.id
+                    });
+                    iframeChallenge.iframe.remove();
+                    iframeChallenge.cancelButton.remove();
+                    this.enablePaymentButton();
+                },
+
+                submitError: function(errorMessage) {
+                    jQuery('#errorMessage-lunarmobilepay').remove();
+                    let html = '<div id="errorMessage-lunarmobilepay" style="color: #ff0000; font-size: 13px; font-weight: normal;">'
+                                + errorMessage
+                                + '<br><a href="/checkout"> Please click to refresh or contact system administrator</a>'
+                                + '</div><br>';
+                    jQuery('#review-buttons-container').prepend(html);
+                    this.disablePaymentButton();
+                },
+
+                disablePaymentButton: function() {
+                    jQuery(this.paymentButtonSelector).prop('disabled', true);
+                },
+
+                enablePaymentButton: function() {
+                    jQuery(this.paymentButtonSelector).prop('disabled', false);
+                },
+            };
+
+
+            /**
+             * Iframe event listener
+             */
+            LUNAR_MOBILEPAY_HANDLER.addIframeEventListener();
+
+
+            let validateLunarMobilePay = function (element) {
+                // return if mobilepay not selected
+                if ( ! lunarMobilePaySelected()) {
+                    if (mageOldPlaceOrder?.call) {
+                        mageOldPlaceOrder();
+                    } else {
+                        review.oldSaveLunarMobilePay();
+                    }
+
+                    return;
+                }
+
+                let mobilepayCheckoutAgreementsForm = new VarienForm('lunarmobilepay-checkout-agreements');
+                if (
+                    mobilepayCheckoutAgreementsForm.form
+                    && !mobilepayCheckoutAgreementsForm.validator.validate()
+                ) {
+                    return;
+                }
+
+                // return if mobilepay public key not provided
+                if ( ! lunarMobilePayCONFIG.publicKey) {
+                    var message = '';
+
+                    if (lunarMobilePayCONFIG.payment_mode == 'test') {
+                        message = 'The Lunar MobilePay test Public key has not been set';
+                    } else {
+                        message = 'The Lunar MobilePay Public key has not been set';
+                    }
+                    showError(message);
+
+                    return;
+                }
+
+                document.getElementById("lunarmobilepay-authorization-id").removeAttribute("disabled");
+
+                if (!lunarMobilePayVAR.name || !lunarMobilePayVAR.name.trim()) {
+                    let firstname = document.querySelector("input[name=\"billing[firstname]\"]").value;
+
+                    let middlename = null;
+                    let middlenameeInput = document.querySelector("input[name=\"billing[middlename]\"]");
+                    if (middlenameInput) {
+                        middlename = middlenameInput.value;
+                    }
+
+                    let lastname = document.querySelector("input[name=\"billing[lastname]\"]").value;
+                    lunarMobilePayVAR.name = [firstname, middlename, lastname].filter(function(name){ return !!name;}).join(" ");
+                }
+
+                if (!lunarMobilePayVAR.email || !lunarMobilePayVAR.email.trim()) {
+                    if (document.getElementById("amasty-scheckout-login-email")) {
+                        lunarMobilePayVAR.email = document.querySelector("#amasty-scheckout-login-email").value;
+                    } else {
+                        lunarMobilePayVAR.email = document.querySelector("input[name=\"billing[email]\"]").value;
+                    }
+                }
+
+                if (!lunarMobilePayVAR.telephone || !lunarMobilePayVAR.telephone.trim()) {
+                    lunarMobilePayVAR.telephone = document.querySelector("input[name=\"billing[telephone]\"]").value;
+                }
+
+                let lunarMobilePayArgs = {
+                    amount: {
+                        currency: lunarMobilePayCONFIG.currency,
+                        exponent: lunarMobilePayCONFIG.exponent,
+                        value: lunarMobilePayVAR.amountlunar,
+                    },
+                    custom: {
+                        quoteId: lunarMobilePayCONFIG.quoteId,
+                        products: jQuery.parseJSON(lunarMobilePayCONFIG.products ?? '{}'),
+                        customer: {
+                            name: lunarMobilePayVAR.name,
+                            email: lunarMobilePayVAR.email,
+                            phoneNo: lunarMobilePayVAR.telephone,
+                            address: lunarMobilePayVAR.address,
+                            IP: lunarMobilePayCONFIG.customerIp
+                        },
+                        locale: lunarMobilePayCONFIG.locale,
+                        platform: {
+                            name: 'Magento',
+                            version: lunarMobilePayCONFIG.platform_version,
+                        },
+                        lunarPluginVersion: lunarMobilePayCONFIG.plugin_version
+                    }
+                };
+
+                if (lunarMobilePayCONFIG.payment_mode == 'test') {
+                    lunarMobilePayArgs.test = {};
+                }
+
+                if (typeof window.oscPlaceOrder === 'function') {
+                    lunarMobilePayArgs.custom.ecommerce = {
+                        name: 'OneStepCheckout',
+                        version: lunarMobilePayCONFIG.oscVersion
+                    };
+                }
+
+                LunarLogger.setContext(lunarMobilePayArgs);
+                LunarLogger.log("Begin Mobile Pay Payment");
+
+
+                /**
+                 * INITIALIZE PAYMENT
+                 */
+                if ('after_order' === lunarMobilePayCONFIG.checkout_mode) {
+                    LunarLogger.log("Payment mode: " + lunarMobilePayCONFIG.checkoutMode);
+
+                    review.oldSaveLunarMobilePay();
+                } else {
+
+                    LUNAR_MOBILEPAY_HANDLER.initiatePaymentServerCall(lunarMobilePayArgs, function(response) {
+                        if(response.error){
+                            LunarLogger.log("Error occured: " + response.error);
+                            LUNAR_MOBILEPAY_HANDLER.submitError(response.error);
+                            return false;
+                        }
+
+                        let authorizationId = response.data.authorizationId;
+
+                        if (authorizationId !== undefined && authorizationId !== "") {
+                            LunarLogger.log("Payment successfull. Authorization ID: " + authorizationId);
+
+                            document.getElementById("lunarmobilepay-authorization-id").value = authorizationId;
+
+                            /* Everything is now setup, we can try placing the order */
+                            review.oldSaveLunarMobilePay();
+                        }
+
+                        LUNAR_MOBILEPAY_HANDLER.hints = response.data.hints;
+
+                        if (response.data.type === 'iframe' || response.data.type === 'background-iframe') {
+                            LUNAR_MOBILEPAY_HANDLER.showMobilePayIframe(response.data);
+                            return false;
+                        }
+
+                        if (response.data.type === 'redirect') {
+                            window.location.href = response.data.url;
+                            return false;
+                        }
+                    });
+                }
+            }
+        </script>
+
+        <input type="hidden" id="lunarmobilepay-authorization-id" name="payment[lunar_transaction_id]" value="<?php echo $fakeTxnId; ?>"/>
+
+<?php
+}
